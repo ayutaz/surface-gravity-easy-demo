@@ -212,8 +212,26 @@ function calculateGravitationalAcceleration(x, y) {
 
     for (let body in celestialBodies) {
         const mass = celestialBodies[body].mass;
-        const bodyX = celestialBodies[body].x;
-        const bodyY = celestialBodies[body].y;
+        let bodyX, bodyY;
+
+        if (body === 'Sun') {
+            bodyX = 0;
+            bodyY = 0;
+        } else {
+            // 公転運動に基づく位置計算
+            const orbitRadius = celestialBodies[body].orbitRadius;
+            const angle = celestialBodies[body].angle;
+
+            bodyX = Math.cos(angle) * orbitRadius;
+            bodyY = Math.sin(angle) * orbitRadius;
+
+            // 惑星の位置を更新
+            celestialBodies[body].x = bodyX;
+            celestialBodies[body].y = bodyY;
+        }
+
+        // コンソールに惑星の位置を出力
+        console.log(`天体: ${body}, 位置: (${bodyX.toFixed(4)}, ${bodyY.toFixed(4)}) AU`);
 
         // 距離を計算（AU単位）
         const dx = bodyX - x;
@@ -228,6 +246,9 @@ function calculateGravitationalAcceleration(x, y) {
         if (distanceM > 0) {
             acceleration = G * mass / (distanceM * distanceM);
         }
+
+        // コンソールに計算結果を出力
+        console.log(`天体: ${body}, 距離: ${distanceAU.toFixed(4)} AU, 重力加速度: ${acceleration.toExponential(3)} m/s²`);
 
         results.push({
             body: body,
@@ -286,19 +307,8 @@ function updateTransform() {
     for (let body in celestialBodies) {
         let celestialBody = celestialBodies[body];
 
-        let x, y;
-        if (body === 'Sun') {
-            x = 0;
-            y = 0;
-        } else {
-            // 公転運動に基づく位置計算
-            const orbitRadius = celestialBody.orbitRadius;
-            celestialBody.x = Math.cos(celestialBody.angle) * orbitRadius;
-            celestialBody.y = Math.sin(celestialBody.angle) * orbitRadius;
-
-            x = celestialBody.x * SCALE;
-            y = celestialBody.y * SCALE;
-        }
+        let x = celestialBody.x * SCALE;
+        let y = celestialBody.y * SCALE;
 
         // 要素の位置を更新（中心基準）
         celestialBody.element.style.transform = `translate(${x}px, ${y}px)`;
