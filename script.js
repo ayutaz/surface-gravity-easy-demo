@@ -133,8 +133,8 @@ container.addEventListener('wheel', function(event) {
     newScale = Math.min(Math.max(minScale, newScale), maxScale);
 
     // マウス位置に合わせて移動
-    translateX -= (mouseX - translateX) * (newScale / scale - 1);
-    translateY -= (mouseY - translateY) * (newScale / scale - 1);
+    translateX -= (mouseX - container.clientWidth / 2 - translateX) * (zoomFactor - 1);
+    translateY -= (mouseY - container.clientHeight / 2 - translateY) * (zoomFactor - 1);
 
     scale = newScale;
 
@@ -190,8 +190,8 @@ container.addEventListener('click', function(event) {
     const offsetY = event.clientY - rect.top;
 
     // スケールと移動を考慮した位置
-    const x = (offsetX - translateX - container.clientWidth / 2) / (SCALE * scale);
-    const y = (offsetY - translateY - container.clientHeight / 2) / (SCALE * scale);
+    const x = (offsetX - container.clientWidth / 2 - translateX) / (SCALE * scale);
+    const y = (offsetY - container.clientHeight / 2 - translateY) / (SCALE * scale);
 
     // 各天体からの重力加速度を計算
     const results = calculateGravitationalAcceleration(x, y);
@@ -272,38 +272,37 @@ function displayResults(x, y, results) {
 
 function updateTransform() {
     universe.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
-    universe.style.transformOrigin = "center center";
+    universe.style.transformOrigin = `${container.clientWidth / 2}px ${container.clientHeight / 2}px`;
 
     // 惑星とラベルのサイズと位置を更新
     for (let body in celestialBodies) {
         let celestialBody = celestialBodies[body];
 
         // 惑星のサイズを更新
-        let newSize = celestialBody.baseSize * scale;
+        let newSize = celestialBody.baseSize;
         celestialBody.element.style.width = `${newSize}px`;
         celestialBody.element.style.height = `${newSize}px`;
 
         // 惑星の位置を更新
         let x, y;
         if (body === 'Sun') {
-            x = celestialBody.x * SCALE * scale + translateX + container.clientWidth / 2 - newSize / 2;
-            y = celestialBody.y * SCALE * scale + translateY + container.clientHeight / 2 - newSize / 2;
+            x = celestialBody.x * SCALE + container.clientWidth / 2 - newSize / 2;
+            y = celestialBody.y * SCALE + container.clientHeight / 2 - newSize / 2;
         } else {
             // 公転運動に基づく位置計算
             const orbitRadius = celestialBody.orbitRadius;
-            x = Math.cos(celestialBody.angle) * orbitRadius * SCALE * scale + translateX + container.clientWidth / 2 - newSize / 2;
-            y = Math.sin(celestialBody.angle) * orbitRadius * SCALE * scale + translateY + container.clientHeight / 2 - newSize / 2;
-
-            // 現在の位置を保存（重力計算用）
             celestialBody.x = Math.cos(celestialBody.angle) * orbitRadius;
             celestialBody.y = Math.sin(celestialBody.angle) * orbitRadius;
+
+            x = celestialBody.x * SCALE + container.clientWidth / 2 - newSize / 2;
+            y = celestialBody.y * SCALE + container.clientHeight / 2 - newSize / 2;
         }
 
         celestialBody.element.style.left = `${x}px`;
         celestialBody.element.style.top = `${y}px`;
 
         // ラベルのフォントサイズを更新
-        let newFontSize = celestialBody.baseFontSize * scale;
+        let newFontSize = celestialBody.baseFontSize;
         celestialBody.label.style.fontSize = `${newFontSize}px`;
 
         // ラベルの位置を更新
