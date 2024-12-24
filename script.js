@@ -62,13 +62,12 @@ function drawSolarSystem() {
         celestialBody.element = div; // DOM要素を保存
         celestialBody.baseSize = celestialBody.size;
 
-        // 座標変換
-        let x = celestialBody.x * SCALE;
-        let y = celestialBody.y * SCALE;
-
-        // 天体を配置
-        div.style.left = (x + container.clientWidth / 2) + 'px';
-        div.style.top = (y + container.clientHeight / 2) + 'px';
+        // 天体を配置 (位置は後で設定)
+        div.style.position = 'absolute';
+        div.style.width = `${celestialBody.baseSize}px`;
+        div.style.height = `${celestialBody.baseSize}px`;
+        div.style.left = `${container.clientWidth / 2 - celestialBody.baseSize / 2}px`;
+        div.style.top = `${container.clientHeight / 2 - celestialBody.baseSize / 2}px`;
 
         // ツールチップを追加
         div.title = body;
@@ -84,9 +83,6 @@ function drawSolarSystem() {
         // ラベルの初期フォントサイズを保存
         celestialBody.label = label;
         celestialBody.baseFontSize = 12; // 初期フォントサイズ（px）
-
-        label.style.left = (x + 5 + container.clientWidth / 2) + 'px';
-        label.style.top = (y - 10 + container.clientHeight / 2) + 'px';
 
         universe.appendChild(label);
 
@@ -274,40 +270,29 @@ function updateTransform() {
     universe.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
     universe.style.transformOrigin = `${container.clientWidth / 2}px ${container.clientHeight / 2}px`;
 
-    // 惑星とラベルのサイズと位置を更新
+    // 惑星とラベルの位置を更新
     for (let body in celestialBodies) {
         let celestialBody = celestialBodies[body];
 
-        // 惑星のサイズを更新
-        let newSize = celestialBody.baseSize;
-        celestialBody.element.style.width = `${newSize}px`;
-        celestialBody.element.style.height = `${newSize}px`;
-
-        // 惑星の位置を更新
         let x, y;
         if (body === 'Sun') {
-            x = celestialBody.x * SCALE + container.clientWidth / 2 - newSize / 2;
-            y = celestialBody.y * SCALE + container.clientHeight / 2 - newSize / 2;
+            x = 0;
+            y = 0;
         } else {
             // 公転運動に基づく位置計算
             const orbitRadius = celestialBody.orbitRadius;
             celestialBody.x = Math.cos(celestialBody.angle) * orbitRadius;
             celestialBody.y = Math.sin(celestialBody.angle) * orbitRadius;
 
-            x = celestialBody.x * SCALE + container.clientWidth / 2 - newSize / 2;
-            y = celestialBody.y * SCALE + container.clientHeight / 2 - newSize / 2;
+            x = celestialBody.x * SCALE;
+            y = celestialBody.y * SCALE;
         }
 
-        celestialBody.element.style.left = `${x}px`;
-        celestialBody.element.style.top = `${y}px`;
-
-        // ラベルのフォントサイズを更新
-        let newFontSize = celestialBody.baseFontSize;
-        celestialBody.label.style.fontSize = `${newFontSize}px`;
+        // 要素の位置を更新
+        celestialBody.element.style.transform = `translate(${x}px, ${y}px)`;
 
         // ラベルの位置を更新
-        celestialBody.label.style.left = `${x + newSize + 5}px`;
-        celestialBody.label.style.top = `${y - newFontSize / 2}px`;
+        celestialBody.label.style.transform = `translate(${x + celestialBody.baseSize + 5}px, ${y - celestialBody.baseFontSize / 2}px)`;
     }
 }
 
