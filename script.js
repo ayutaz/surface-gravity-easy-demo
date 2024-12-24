@@ -66,8 +66,13 @@ function drawSolarSystem() {
         div.style.position = 'absolute';
         div.style.width = `${celestialBody.baseSize}px`;
         div.style.height = `${celestialBody.baseSize}px`;
-        div.style.left = `${container.clientWidth / 2 - celestialBody.baseSize / 2}px`;
-        div.style.top = `${container.clientHeight / 2 - celestialBody.baseSize / 2}px`;
+
+        // 要素の中心を基準に位置を調整
+        div.style.transformOrigin = 'center';
+
+        // 天体を中央に配置（初期位置）
+        div.style.left = `${container.clientWidth / 2}px`;
+        div.style.top = `${container.clientHeight / 2}px`;
 
         // ツールチップを追加
         div.title = body;
@@ -83,6 +88,12 @@ function drawSolarSystem() {
         // ラベルの初期フォントサイズを保存
         celestialBody.label = label;
         celestialBody.baseFontSize = 12; // 初期フォントサイズ（px）
+
+        // ラベルを中央に配置（初期位置）
+        label.style.position = 'absolute';
+        label.style.left = `${container.clientWidth / 2}px`;
+        label.style.top = `${container.clientHeight / 2}px`;
+        label.style.transformOrigin = 'left center';
 
         universe.appendChild(label);
 
@@ -267,8 +278,9 @@ function displayResults(x, y, results) {
 }
 
 function updateTransform() {
-    universe.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
-    universe.style.transformOrigin = `${container.clientWidth / 2}px ${container.clientHeight / 2}px`;
+    // universe の transform を更新
+    universe.style.transform = `translate(${translateX + container.clientWidth / 2}px, ${translateY + container.clientHeight / 2}px) scale(${scale})`;
+    universe.style.transformOrigin = `0 0`;
 
     // 惑星とラベルの位置を更新
     for (let body in celestialBodies) {
@@ -288,11 +300,13 @@ function updateTransform() {
             y = celestialBody.y * SCALE;
         }
 
-        // 要素の位置を更新
+        // 要素の位置を更新（中心基準）
         celestialBody.element.style.transform = `translate(${x}px, ${y}px)`;
+        celestialBody.element.style.transformOrigin = 'center';
 
-        // ラベルの位置を更新
-        celestialBody.label.style.transform = `translate(${x + celestialBody.baseSize + 5}px, ${y - celestialBody.baseFontSize / 2}px)`;
+        // ラベルの位置を更新（左上基準）
+        celestialBody.label.style.transform = `translate(${x + celestialBody.baseSize / 2 + 5}px, ${y - celestialBody.baseFontSize / 2}px)`;
+        celestialBody.label.style.transformOrigin = 'left center';
     }
 }
 
